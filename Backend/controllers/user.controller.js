@@ -1,6 +1,7 @@
 const userModel = require('../models/user.model');
 const userService = require('../services/user.service');
-
+const { validationResult } = require('express-validator');
+const bcrypt = require('bcrypt');
 
 module.exports.registerUser = async (req, res) => {
     const errors = validationResult(req);
@@ -8,16 +9,16 @@ module.exports.registerUser = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const {firstname, lastname, email, password} = req.body;
+    const {fullname, email, password} = req.body;
 
-    const hasedpassword = await bcrypt.hash(password);
+    const hashedpassword = await bcrypt.hash(password,10);
 
     const user = await userService.createUser({
-        firstname,
-        lastname,
-        email,
-        password: hasedpassword
-    });
+    firstname: fullname.firstname,
+    lastname: fullname.lastname,
+    email,
+    password: hashedpassword
+});
 
     const token = user.generateAuthToken();
 
